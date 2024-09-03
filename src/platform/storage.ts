@@ -43,6 +43,44 @@ export async function readRecords(): Promise<StoredRecord[]> {
   const db = await database();
   return requested(db.transaction('records').objectStore('records').getAll());
 }
+export interface StoredFile { key: string; blob: Blob }
+export async function readFiles(): Promise<StoredFile[]> {
+  const db = await database();
+  const transaction = db.transaction('files');
+  const done = committed(transaction);
+  const store = transaction.objectStore('files');
+  const [keys, blobs] = await Promise.all([
+    requested(store.getAllKeys()),
+    requested(store.getAll()) as Promise<Blob[]>,
+  ]);
+  await done;
+  return keys.map((key, index) => ({ key: String(key), blob: blobs[index]! }));
+}
+export interface LocalEdits {
+  recordPuts?: StoredRecord[];
+  recordDeletes?: { scope: string; collection: string; id: string }[];
+  filePuts?: StoredFile[];
+  fileDeletes?: string[];
+}
+/** Applies a batch of local writes, then tells every open notebook once. */
+export async function commitLocalEdits(edits: LocalEdits): Promise<void> {
+  const recordPuts = edits.recordPuts ?? [];
+  const recordDeletes = edits.recordDeletes ?? [];
+  const filePuts = edits.filePuts ?? [];
+  const fileDeletes = edits.fileDeletes ?? [];
+  if (!recordPuts.length && !recordDeletes.length && !filePuts.length && !fileDeletes.length) return;
+  const db = await database();
+  const transaction = db.transaction(['records', 'files'], 'readwrite');
+  const done = committed(transaction);
+  const records = transaction.objectStore('records');
+  const files = transaction.objectStore('files');
+  recordPuts.forEach(row => records.put(row));
+  recordDeletes.forEach(key => records.delete([key.scope, key.collection, key.id]));
+  filePuts.forEach(file => files.put(file.blob, file.key));
+  fileDeletes.forEach(key => files.delete(key));
+  await done;
+  changed();
+}
 export function mergePatch(target: Record<string, unknown>, patch: Record<string, unknown>): Record<string, unknown> {
   const next = { ...target };
   for (const [key, value] of Object.entries(patch)) {

@@ -1,6 +1,6 @@
 # Notes
 
-A standalone, personal notes app with a block editor, nested pages, databases, backlinks, graph views, attachments, history, and light/dark themes. Runs entirely in your browser with IndexedDB storage. No accounts, API keys, SDK host, or cloud backend required.
+A standalone, personal notes app with a block editor, nested pages, databases, backlinks, graph views, attachments, history, and light/dark themes. Notes stay in this browser's IndexedDB. When Jazz is configured, the same notebook syncs to Jazz Cloud for this local-first account.
 
 ## Run locally
 
@@ -12,6 +12,8 @@ npm run dev
 ```
 
 Open **http://127.0.0.1:8870**. Keep using that exact address: browser storage belongs to an origin, so changing the hostname, protocol, or port opens a separate notebook.
+
+Copy `.env.example` to `.env` to sync through Jazz. `VITE_JAZZ_APP_ID` and `VITE_JAZZ_SERVER_URL` are public. `JAZZ_ADMIN_SECRET` and `BACKEND_SECRET` stay on the machine that deploys the schema; they are not included in the browser bundle. The dev server publishes `src/jazz/schema.ts` when those values are set. Without them, the notebook stays on this browser only.
 
 For a production build served locally:
 
@@ -36,7 +38,7 @@ Notes, settings, page history, and attachments are stored in this browser's Inde
 
 Use **Settings → Download backup** to export all records and attachments as JSON. Use **Settings → Restore backup…** to restore it. Restore replaces the current notebook after confirmation. Keep a backup before restoring or moving to another address. Backup files contain your notebook and attachments in readable form; store them appropriately.
 
-This version is for personal use. It does not provide accounts, cloud sync, sharing, invitations, remote agents, or collaborative text merging. Open tabs on the same origin refresh one another's changes; concurrent edits to the same field use the last committed write. Link cards do not request remote metadata. Embedded content and linked images may contact their respective providers when displayed; the core app has no external service requirement.
+This version is for personal use. It does not provide sharing, invitations, remote agents, or collaborative text merging. With Jazz configured, each browser has a local-first account and syncs only the rows that account created. Open tabs on the same origin refresh one another's changes; concurrent edits to the same field use the last committed write, and the newer sync clock wins across devices. Link cards do not request remote metadata. Embedded content and linked images may contact their respective providers when displayed.
 
 ## Development
 
