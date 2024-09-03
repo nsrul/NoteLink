@@ -11,6 +11,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import HomePage from "./components/HomePage";
 
 // Set up Axios base URL and interceptor for Authorization header
 axios.defaults.baseURL = "http://localhost:3500"; // Adjust to API base url
@@ -100,6 +101,7 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
+          <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
           <Route path="/signup" element={<SignUp />} />
           <Route
