@@ -1,2 +1,0 @@
-GET http://localhost:3500/tasks
-Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QyQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI1MDA0OTU0LCJ1c2VySWQiOjB9.pT03krMPtzAFB5WZeetk1VeahORFucagU5R34Cs_CeQ

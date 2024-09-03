@@ -1,8 +1,0 @@
-POST http://localhost:3000/tasks
-content-type: application/json
-Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QyQGV4YW1wbGUuY29tIiwiZXhwIjoxNzI1MDE2NTk5LCJ1c2VySWQiOjJ9.DIar5VDF9uHZXosmHXkOZ89AUONsxDMDy5-PVzXkuOQ
-
-{
-    "title": "Nasrul Huda",
-    "content": "I am 99 years old"
-}
