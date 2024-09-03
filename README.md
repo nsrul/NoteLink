@@ -13,7 +13,7 @@ npm run dev
 
 Open **http://127.0.0.1:8870**. Keep using that exact address: browser storage belongs to an origin, so changing the hostname, protocol, or port opens a separate notebook.
 
-Copy `.env.example` to `.env` to sync through Jazz. `VITE_JAZZ_APP_ID` and `VITE_JAZZ_SERVER_URL` are public. `JAZZ_ADMIN_SECRET` and `BACKEND_SECRET` stay on the machine that deploys the schema; they are not included in the browser bundle. The dev server publishes `src/jazz/schema.ts` when those values are set. Without them, the notebook stays on this browser only.
+Copy `.env.example` to `.env` to sync through Jazz. `VITE_JAZZ_APP_ID` and `VITE_JAZZ_SERVER_URL` are public. `JAZZ_ADMIN_SECRET` and `BACKEND_SECRET` stay on the machine that deploys the schema; they are not included in the browser bundle. The dev server publishes `src/jazz/schema.ts` when those values are set. Without them, the notebook stays on this browser only. CI stores the same four names as repository secrets. Its production build receives the two public values, and a push to main publishes the schema.
 
 For a production build served locally:
 

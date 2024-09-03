@@ -16,4 +16,45 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm test
-      - run: npm run build
+      - name: Build with Jazz settings
+        env:
+          VITE_JAZZ_APP_ID: ${{ secrets.VITE_JAZZ_APP_ID }}
+          VITE_JAZZ_SERVER_URL: ${{ secrets.VITE_JAZZ_SERVER_URL }}
+        run: npm run build
+      - name: Confirm the bundle includes Jazz settings
+        env:
+          VITE_JAZZ_APP_ID: ${{ secrets.VITE_JAZZ_APP_ID }}
+          VITE_JAZZ_SERVER_URL: ${{ secrets.VITE_JAZZ_SERVER_URL }}
+        run: |
+          node --input-type=module <<'EOF'
+          import { readFileSync, readdirSync, statSync } from "node:fs";
+          import { join } from "node:path";
+          const appId = process.env.VITE_JAZZ_APP_ID?.trim();
+          const serverUrl = process.env.VITE_JAZZ_SERVER_URL?.trim();
+          if (!appId || !serverUrl) {
+            console.error("Jazz build settings are missing");
+            process.exit(1);
+          }
+          const files = [];
+          const walk = (dir) => {
+            for (const name of readdirSync(dir)) {
+              const path = join(dir, name);
+              if (statSync(path).isDirectory()) walk(path);
+              else if (path.endsWith(".js")) files.push(path);
+            }
+          };
+          walk("dist");
+          const bundle = files.map((path) => readFileSync(path, "utf8")).join("\n");
+          if (!bundle.includes(appId) || !bundle.includes(serverUrl)) {
+            console.error("Production bundle is missing Jazz settings");
+            process.exit(1);
+          }
+          console.log("Production bundle includes Jazz settings");
+          EOF
+      - name: Publish Jazz schema
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          VITE_JAZZ_APP_ID: ${{ secrets.VITE_JAZZ_APP_ID }}
+          VITE_JAZZ_SERVER_URL: ${{ secrets.VITE_JAZZ_SERVER_URL }}
+          JAZZ_ADMIN_SECRET: ${{ secrets.JAZZ_ADMIN_SECRET }}
+        run: npx --no-install jazz-tools deploy --schema-dir src/jazz
