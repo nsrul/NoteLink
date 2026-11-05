@@ -48,6 +48,7 @@ import { bodyPath, linkIntoParent, trashWrites } from "./page-rows";
 import { reidentify } from "../features/editor/editor-commands";
 import { selectionPoints } from "../features/editor/selection";
 import { createPlatformClient, type PlatformClient } from "../platform/client";
+import { startAppJazzSync } from "../platform/jazz-sync";
 import { SpaceRosters } from "../platform/rosters";
 import { WorkspaceDocument, type SyncStatus, type WorkspaceMutation } from "../platform/workspace-document";
 import { WorkspaceStateStore, WorkspaceStoreContext } from "./workspace-store";
@@ -248,8 +249,18 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     let active = true;
     let opened: WorkspaceDocument | null = null;
     let unsubscribe = () => {};
-    void createPlatformClient()
+    void (async () => {
+      try {
+        const sync = await startAppJazzSync();
+        await sync?.ready;
+      } catch (reason) {
+        console.error(reason);
+      }
+      if (!active) return;
+      return createPlatformClient();
+    })()
       .then(async (client) => {
+        if (!client || !active) return;
         const next = await WorkspaceDocument.open(client);
         if (!active) {
           await next.close();
